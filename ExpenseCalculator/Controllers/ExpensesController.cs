@@ -44,7 +44,44 @@ public class ExpensesController : ControllerBase
         }
         return Ok(expense);
     }
+    
+    // GET: api/expenses/summary
+    [HttpGet("summary")]
+    public async Task<ActionResult> GetSummary([FromQuery] int householdId = 1)
+    {
+        var expenses = await _context.Expenses
+            .Where(e => e.HouseholdId == householdId)
+            .Include(e => e.Category)
+            .ToListAsync();
+        
+        var totalSpent = expenses.Sum(e => e.Amount);
 
+        var byCategory = expenses
+            .GroupBy(e => e.Category.Name)
+            .Select(g => new
+            {
+                Category = g.Key,
+                Total = g.Sum(e => e.Amount),
+                Count = g.Count()
+            })
+            .OrderByDescending(x => x.Total)
+            .ToList();
+
+        var thisMonth = expenses
+            .Where(e => e.ExpenseDate.Month == DateTime.UtcNow.Month
+                                && e.ExpenseDate.Year == DateTime.UtcNow.Year)
+            .Sum(e => e.Amount);
+
+        return Ok(new
+        {
+            TotalSpent = totalSpent,
+            ThisMonth = thisMonth,
+            ByCategory = byCategory,
+            TotalExpenses = expenses.Count
+        });
+    }
+    
+    // POST: api/Expenses
     [HttpPost]
     public async Task<ActionResult<Expense>> CreateExpense(Expense expense)
     {

@@ -93,4 +93,34 @@ public class ExpensesController : ControllerBase
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
     }
+    
+    // PUT: api/Expenses/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateExpense(int id, Expense expense)
+    {
+        if (id != expense.Id)
+        {
+            return BadRequest();
+        }
+        
+        expense.UpdatedAt = DateTime.UtcNow;
+        _context.Entry(expense).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch
+        {
+            if (!await _context.Expenses.AnyAsync(e => e.Id == id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+        return NoContent();
+    }
 }

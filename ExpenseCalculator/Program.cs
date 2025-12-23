@@ -4,6 +4,17 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // DbContext configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -16,6 +27,9 @@ builder.Services.AddControllers()
     });
 
 var app =  builder.Build();
+
+// Use CORS
+app.UseCors("AllowReactApp");
 
 // Seed the database
 using (var scope = app.Services.CreateScope())

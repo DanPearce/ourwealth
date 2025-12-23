@@ -44,4 +44,16 @@ public class ExpensesController : ControllerBase
         }
         return Ok(expense);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<Expense>> CreateExpense(Expense expense)
+    {
+        // Set Timestamps
+        expense.CreatedAt = DateTime.UtcNow;
+        expense.UpdatedAt = DateTime.UtcNow;
+        
+        _context.Expenses.Add(expense);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
+    }
 }

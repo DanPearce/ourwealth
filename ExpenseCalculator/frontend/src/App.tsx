@@ -1,25 +1,36 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { useExpenses } from './hooks/useExpenses';
 
 function App() {
+  const { data: expenses, isLoading, error } = useExpenses();
+
+  if (isLoading) return <div>Loading expenses...</div>;
+  if (error) return <div>Error loading expenses: {String(error)}</div>;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <div className="App">
+        <header className="App-header">
+          <h1>OurWealth</h1>
+          <h2>Recent Expenses</h2>
+
+          {expenses && expenses.length > 0 ? (
+              <ul style={{ textAlign: 'left', maxWidth: '600px' }}>
+                {expenses.map((expense) => (
+                    <li key={expense.id}>
+                      <strong>{expense.description}</strong> - £{expense.amount.toFixed(2)}
+                      <br />
+                      <small>
+                        {expense.category?.name} • {new Date(expense.expenseDate).toLocaleDateString()}
+                      </small>
+                    </li>
+                ))}
+              </ul>
+          ) : (
+              <p>No expenses found</p>
+          )}
+        </header>
+      </div>
   );
 }
 

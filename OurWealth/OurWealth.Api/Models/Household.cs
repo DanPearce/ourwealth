@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ExpenseCalculator.Models
+namespace OurWealth.Api.Models
 {
     // Household class - represents a household with members and expenses
     public class Household

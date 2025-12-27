@@ -1,6 +1,6 @@
-using ExpenseCalculator.Models;
+using OurWealth.Api.Models;
 
-namespace ExpenseCalculator.Data
+namespace OurWealth.Api.Data
 {
     public static class DbSeeder
     {

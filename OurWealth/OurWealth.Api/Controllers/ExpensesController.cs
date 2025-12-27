@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ExpenseCalculator.Models;
-using ExpenseCalculator.Data;
+using OurWealth.Api.Models;
+using OurWealth.Api.Data;
 
-namespace ExpenseCalculator.Controllers;
+namespace OurWealth.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

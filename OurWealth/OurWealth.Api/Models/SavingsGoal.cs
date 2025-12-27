@@ -1,4 +1,4 @@
-namespace ExpenseCalculator.Models;
+namespace OurWealth.Api.Models;
 
 public class SavingsGoal
 {

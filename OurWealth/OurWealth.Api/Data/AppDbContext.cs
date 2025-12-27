@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ExpenseCalculator.Models;
+using OurWealth.Api.Models;
 
-namespace ExpenseCalculator.Data;
+namespace OurWealth.Api.Data;
 
 public class AppDbContext : DbContext
 {

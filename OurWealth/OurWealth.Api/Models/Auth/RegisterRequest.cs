@@ -1,6 +1,9 @@
-namespace ExpenseCalculator.Models.Auth;
+namespace OurWealth.Api.Models.Auth;
 
 public class RegisterRequest
 {
-    
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

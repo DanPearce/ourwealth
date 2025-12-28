@@ -1,3 +1,4 @@
+#nullable enable
 namespace OurWealth.Api.Models;
 
 public class User

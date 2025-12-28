@@ -60,13 +60,6 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
-// Seed the database
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    DbSeeder.SeedData(context);
-}
-
 // Use CORS (MUST come before Authentication/Authorization)
 app.UseCors("AllowReactApp");
 

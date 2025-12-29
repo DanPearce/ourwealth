@@ -1,13 +1,22 @@
 # OurWealth - Budget and expense tracking, built for couples.
-----
 
-# Our Wealth API
+## Repository Structure
+```
+ourwealth/
+├── OurWealth.Api/      # ASP.NET Core API
+├── frontend/           # React/Next.js frontend
+└── README.md           # This file
+```
+
+## Our Wealth API
 
 The RESTful API for OurWealth, built with ASP.NET Core and PostgreSQL. 
 
 OurWealth enables couples to collaboratively manage finances, track expenses, split bills, monitor debts, and achieve savings goals together.
 
-## Features
+---
+
+### Features
 
 - **Two-user household management** - Secure, isolated data per household
 - **Expense tracking** - Categorized spending with history
@@ -19,29 +28,30 @@ OurWealth enables couples to collaboratively manage finances, track expenses, sp
 - **Expense splitting** - Track settlements between household members
 - **JWT authentication** - Secure token-based auth with BCrypt password hashing
 
-## Technology Stack
+### Technology Stack
 
 - **Framework:** ASP.NET Core 10.0 (C#)
 - **Database:** PostgreSQL 18
 - **ORM:** Entity Framework Core
 - **Authentication:** JWT with BCrypt password hashing
 
-## Prerequisites
+### Prerequisites
 
 - .NET 10.0 SDK
 - PostgreSQL 18
 - Git
 
-## Installation & Setup
+### Installation & Setup
 
-### 1. Clone the Repository
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/DanPearce/ourwealth.git
-cd ourwealth/OurWealth.Api
+cd ourwealth
+cd OurWealth.Api
 ```
 
-### 2. Configure Database Connection
+#### 2. Configure Database Connection
 
 Update `appsettings.json` with your PostgreSQL credentials - use the below for local development:
 
@@ -59,7 +69,7 @@ Update `appsettings.json` with your PostgreSQL credentials - use the below for l
 }
 ```
 
-### 3. Create Database
+#### 3. Create Database
 
 ```bash
 # Start PostgreSQL service
@@ -69,13 +79,13 @@ brew services start postgresql@18
 createdb ourwealth
 ```
 
-### 4. Run Migrations
+#### 4. Run Migrations
 
 ```bash
 dotnet ef database update
 ```
 
-### 5. Run the API
+#### 5. Run the API
 
 ```bash
 dotnet run
@@ -83,9 +93,9 @@ dotnet run
 
 The API will be available at `http://localhost:5000`
 
-## Authentication
+### Authentication
 
-### Register & Login
+#### Register & Login
 
 All endpoints except `/api/auth/register` and `/api/auth/login` require JWT authentication.
 
@@ -101,18 +111,18 @@ Include the JWT token in the `Authorization` header for all protected endpoints:
 Authorization: Bearer <your_jwt_token>
 ```
 
-## API Endpoints
+### API Endpoints
 
 All endpoints except `/api/auth/*` require JWT authentication via the `Authorization: Bearer <token>` header.
 
-### Authentication
+#### Authentication
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/register` | Create new user account |
 | POST | `/api/auth/login` | Authenticate and receive JWT token |
 
-### Expenses
+#### Expenses
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -122,7 +132,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/expenses/{id}` | Update expense | - |
 | DELETE | `/api/expenses/{id}` | Soft delete expense | - |
 
-### Categories
+#### Categories
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -132,7 +142,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/categories/{id}` | Update category | - |
 | DELETE | `/api/categories/{id}` | Soft delete category | - |
 
-### Budgets
+#### Budgets
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -142,7 +152,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/budgets/{id}` | Update budget | - |
 | DELETE | `/api/budgets/{id}` | Delete budget | - |
 
-### Income
+#### Income
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -152,7 +162,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/income/{id}` | Update income | - |
 | DELETE | `/api/income/{id}` | Delete income | - |
 
-### Recurring Bills
+#### Recurring Bills
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -162,7 +172,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/recurringbills/{id}` | Update bill | - |
 | DELETE | `/api/recurringbills/{id}` | Soft delete bill | - |
 
-### Bill Payments
+#### Bill Payments
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -172,7 +182,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/billpayments/{id}` | Update payment | - |
 | DELETE | `/api/billpayments/{id}` | Delete payment | - |
 
-### Debts
+#### Debts
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -182,7 +192,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/debts/{id}` | Update debt | - |
 | DELETE | `/api/debts/{id}` | Soft delete debt | - |
 
-### Debt Payments
+#### Debt Payments
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -192,7 +202,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/debtpayments/{id}` | Update payment | - |
 | DELETE | `/api/debtpayments/{id}` | Delete payment | - |
 
-### Savings Goals
+#### Savings Goals
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -202,7 +212,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/savingsgoals/{id}` | Update goal | - |
 | DELETE | `/api/savingsgoals/{id}` | Soft delete goal | - |
 
-### Savings Contributions
+#### Savings Contributions
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -210,7 +220,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | POST | `/api/savingscontributions` | Add contribution (auto-updates goal balance) | - |
 | DELETE | `/api/savingscontributions/{id}` | Delete contribution | - |
 
-### Settlements
+#### Settlements
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
@@ -221,9 +231,9 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | PUT | `/api/settlements/{id}` | Update settlement | - |
 | DELETE | `/api/settlements/{id}` | Delete settlement | - |
 
-## Database Schema
+### Database Schema
 
-### Entity Relationships
+#### Entity Relationships
 
 ```
 Households (1) ←→ (Many) Users
@@ -252,7 +262,7 @@ Debts (1) ←→ (Many) DebtPayments
 SavingsGoals (1) ←→ (Many) SavingsContributions
 ```
 
-### Core Tables
+#### Core Tables
 
 **Users**
 - Id (PK)
@@ -358,29 +368,29 @@ SavingsGoals (1) ←→ (Many) SavingsContributions
 - Amount, SettlementDate
 - Notes, CreatedAt
 
-## Security Features
+### Security Features
 
-### Authentication & Authorization
+#### Authentication & Authorization
 - **JWT Tokens:** Token-based authentication
 - **BCrypt Hashing:** Secure password storage
 - **Token Expiration:** Configurable token lifetime
 - **Protected Endpoints:** All endpoints except `/api/auth/*` require authentication
 
-### Data Isolation
+#### Data Isolation
 - **Household-Level Security:** Users can only access data from their own household
 - **Query Filtering:** All database queries automatically filter by `HouseholdId`
 - **User Verification:** FromUserId/ToUserId validated against household membership
 - **Cross-Household Prevention:** Cannot create records linking to other households
 
-### Input Validation
+#### Input Validation
 - **DTO Pattern:** Separate Data Transfer Objects prevent over-posting attacks
 - **Model Validation:** Required fields, data types, and constraints enforced
 - **Business Rules:** e.g., Cannot settle with yourself, both users must be in household
 - **SQL Injection Protection:** Entity Framework parameterized queries
 
-## Key Design Patterns
+### Key Design Patterns
 
-### Automatic Balance Tracking
+#### Automatic Balance Tracking
 
 **DebtPaymentsController:**
 ```csharp
@@ -412,7 +422,7 @@ var iOwe = settlements.Where(s => s.FromUserId == userId).Sum(s => s.Amount);
 var netBalance = owedToMe - iOwe;
 ```
 
-### Soft vs. Hard Deletes
+#### Soft vs. Hard Deletes
 
 **Soft Delete (Preserves History):**
 - Categories
@@ -429,7 +439,7 @@ var netBalance = owedToMe - iOwe;
 - Savings Contributions
 - Settlements
 
-## Testing
+### Testing
 
 All endpoints have been thoroughly tested using curl commands with JWT authentication. The API supports manual testing via tools like:
 - curl (command line)
@@ -445,7 +455,7 @@ Testing includes verification of:
 - Query parameter filtering
 - Error handling and validation
 
-## Project Structure
+### Project Structure
 
 ```
 OurWealth.Api/
@@ -483,7 +493,7 @@ OurWealth.Api/
 └── Program.cs           # App startup
 ```
 
-## Additional Resources
+### Additional Resources
 
 - [ASP.NET Core Documentation](https://docs.microsoft.com/en-us/aspnet/core/)
 - [Entity Framework Core Documentation](https://docs.microsoft.com/en-us/ef/core/)

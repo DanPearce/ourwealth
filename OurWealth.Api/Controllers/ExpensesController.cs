@@ -31,16 +31,18 @@ public class ExpensesController : ControllerBase
         return int.Parse(userIdClaim.Value);
     }
     
-    // GET: api/expenses
+    // GET: api/expenses?page=1&pageSize=50&startDate=...
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
+    public async Task<ActionResult<PaginatedExpensesResponse>> GetExpenses(
         [FromQuery] DateTime? startDate,
         [FromQuery] DateTime? endDate,
         [FromQuery] decimal? minAmount,
         [FromQuery] decimal? maxAmount,
         [FromQuery] string? search,
         [FromQuery] int? categoryId,
-        [FromQuery] int? paidById)
+        [FromQuery] int? paidById,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         var userId = GetCurrentUserId();
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -50,6 +52,10 @@ public class ExpensesController : ControllerBase
             return BadRequest(new { message = "User must be part of a household" });
         }
         
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 50;
+        if (pageSize > 100) pageSize = 100;
+        
         var query = _context.Expenses
             .Where(e => e.HouseholdId == user.HouseholdId)
             .Include(e => e.Category)
@@ -57,45 +63,48 @@ public class ExpensesController : ControllerBase
             .AsQueryable();
         
         if (startDate.HasValue)
-        {
             query = query.Where(e => e.ExpenseDate >= startDate.Value);
-        }
         
         if (endDate.HasValue)
-        {
             query = query.Where(e => e.ExpenseDate <= endDate.Value);
-        }
         
         if (minAmount.HasValue)
-        {
             query = query.Where(e => e.Amount >= minAmount.Value);
-        }
         
         if (maxAmount.HasValue)
-        {
             query = query.Where(e => e.Amount <= maxAmount.Value);
-        }
         
         if (!string.IsNullOrWhiteSpace(search))
-        {
             query = query.Where(e => e.Description.ToLower().Contains(search.ToLower()));
-        }
         
         if (categoryId.HasValue)
-        {
             query = query.Where(e => e.CategoryId == categoryId.Value);
-        }
         
         if (paidById.HasValue)
-        {
             query = query.Where(e => e.PaidByUserId == paidById.Value);
-        }
+        
+        var totalCount = await query.CountAsync();
         
         var expenses = await query
             .OrderByDescending(e => e.ExpenseDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
         
-        return Ok(expenses);
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        
+        var response = new PaginatedExpensesResponse
+        {
+            Items = expenses,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = totalPages,
+            HasNextPage = page < totalPages,
+            HasPreviousPage = page > 1
+        };
+        
+        return Ok(response);
     }
     
     // GET: api/expenses/5
@@ -287,4 +296,15 @@ public class CreateExpenseRequest
     public decimal Amount { get; set; }
     public DateTime ExpenseDate { get; set; }
     public string? Notes { get; set; }
+}
+
+public class PaginatedExpensesResponse
+{
+    public List<Expense> Items { get; set; } = new();
+    public int TotalCount { get; set; }       // Total expenses matching filters
+    public int Page { get; set; }             // Current page number
+    public int PageSize { get; set; }         // Items per page
+    public int TotalPages { get; set; }       // Total pages available
+    public bool HasNextPage { get; set; }     // Can go to next page?
+    public bool HasPreviousPage { get; set; } // Can go to previous page?
 }

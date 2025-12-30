@@ -33,24 +33,65 @@ public class ExpensesController : ControllerBase
     
     // GET: api/expenses
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses()
+    public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
+        [FromQuery] decimal? minAmount,
+        [FromQuery] decimal? maxAmount,
+        [FromQuery] string? search,
+        [FromQuery] int? categoryId,
+        [FromQuery] int? paidById)
     {
         var userId = GetCurrentUserId();
-        
-        // Get user's household
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         
         if (user?.HouseholdId == null)
         {
             return BadRequest(new { message = "User must be part of a household" });
         }
         
-        var expenses = await _context.Expenses
+        var query = _context.Expenses
             .Where(e => e.HouseholdId == user.HouseholdId)
             .Include(e => e.Category)
-            .Include(e => e.Household)
-            .Include(e => e.PaidByUser)
+            .Include(e => e.PaidByUserId)
+            .AsQueryable();
+        
+        if (startDate.HasValue)
+        {
+            query = query.Where(e => e.ExpenseDate >= startDate.Value);
+        }
+        
+        if (endDate.HasValue)
+        {
+            query = query.Where(e => e.ExpenseDate <= endDate.Value);
+        }
+        
+        if (minAmount.HasValue)
+        {
+            query = query.Where(e => e.Amount >= minAmount.Value);
+        }
+        
+        if (maxAmount.HasValue)
+        {
+            query = query.Where(e => e.Amount <= maxAmount.Value);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(e => e.Description.ToLower().Contains(search.ToLower()));
+        }
+        
+        if (categoryId.HasValue)
+        {
+            query = query.Where(e => e.CategoryId == categoryId.Value);
+        }
+        
+        if (paidById.HasValue)
+        {
+            query = query.Where(e => e.PaidByUserId == paidById.Value);
+        }
+        
+        var expenses = await query
             .OrderByDescending(e => e.ExpenseDate)
             .ToListAsync();
         

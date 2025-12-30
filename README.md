@@ -25,7 +25,12 @@ OurWealth enables couples to collaboratively manage finances, track expenses, sp
 - **Recurring bills** - Manage subscriptions and regular payments
 - **Debt tracking** - Credit cards and loans with automatic balance updates
 - **Savings goals** - Set targets and track progress
-- **Expense splitting** - Track settlements between household members
+- **Expense splitting** - Track settlements between household members 
+- **Dashboard analytics** - Comprehensive financial overview in a single endpoint
+- **Advanced reporting** - Monthly summaries, category breakdowns, and month comparisons
+- **Smart filtering** - Search expenses by date range, amount, category, or description
+- **Pagination** - Efficient handling of large expense datasets
+- **Upcoming bills tracking** - View unpaid bills due in the next X days
 - **JWT authentication** - Secure token-based auth with BCrypt password hashing
 
 ### Technology Stack
@@ -126,7 +131,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
-| GET | `/api/expenses` | List all household expenses | `categoryId`, `month`, `year`, `paidByUserId` |
+| GET | `/api/expenses` | List all household expenses with filtering & pagination | `page`, `pageSize`, `startDate`, `endDate`, `minAmount`, `maxAmount`, `search`, `categoryId`, `paidById` |
 | GET | `/api/expenses/{id}` | Get single expense details | - |
 | POST | `/api/expenses` | Create new expense | - |
 | PUT | `/api/expenses/{id}` | Update expense | - |
@@ -168,6 +173,7 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 |--------|----------|-------------|--------------|
 | GET | `/api/recurringbills` | List household recurring bills | `isActive` |
 | GET | `/api/recurringbills/{id}` | Get single bill with payment history | - |
+| GET | `/api/recurringbills/upcoming` | Get unpaid bills due in next X days | `days` |
 | POST | `/api/recurringbills` | Create recurring bill | - |
 | PUT | `/api/recurringbills/{id}` | Update bill | - |
 | DELETE | `/api/recurringbills/{id}` | Soft delete bill | - |
@@ -230,6 +236,28 @@ All endpoints except `/api/auth/*` require JWT authentication via the `Authoriza
 | POST | `/api/settlements` | Record who owes whom | - |
 | PUT | `/api/settlements/{id}` | Update settlement | - |
 | DELETE | `/api/settlements/{id}` | Delete settlement | - |
+
+#### Dashboard
+
+| Method | Endpoint | Description | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/dashboard` | Get comprehensive financial overview | `month`, `year` |
+
+#### Reports
+
+| Method | Endpoint | Description | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/reports/monthly-summary` | Complete monthly financial summary | `month`, `year` |
+| GET | `/api/reports/spending-by-category` | Category spending breakdown | `month`, `year` |
+| GET | `/api/reports/budget-comparison` | Budget vs actual per category | `month`, `year` |
+| GET | `/api/reports/month-comparison` | Compare two months side-by-side | `month1`, `year1`, `month2`, `year2` |
+
+#### Users
+
+| Method | Endpoint | Description | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/users/profile` | Get current user profile with household info | - |
+| GET | `/api/users/household-members` | List all household members | - |
 
 ### Database Schema
 
@@ -439,6 +467,51 @@ var netBalance = owedToMe - iOwe;
 - Savings Contributions
 - Settlements
 
+### Advanced Features
+
+#### Pagination
+
+The Expenses endpoint supports pagination to efficiently handle large datasets:
+```csharp
+GET /api/expenses?page=1&pageSize=50
+// Returns: { items: [...], totalCount, page, pageSize, totalPages, hasNextPage, hasPreviousPage }
+```
+
+#### Advanced Filtering
+
+Expenses can be filtered by multiple criteria simultaneously:
+```csharp
+GET /api/expenses?startDate=2024-01-01&endDate=2024-12-31&minAmount=50&maxAmount=500&search=tesco&categoryId=2
+```
+
+#### Dashboard Aggregation
+
+The Dashboard endpoint returns comprehensive financial data in a single API call:
+- Total income and expenses for the month
+- Expenses grouped by category
+- Budget progress with remaining amounts
+- Active debts with balances
+- Savings goals with progress
+- Upcoming unpaid bills
+- Recent expense transactions
+- Settlement balance between household members
+
+#### Monthly Reports
+
+The Reports controller provides analytics endpoints:
+- **Monthly Summary:** Complete income/expense breakdown with category details
+- **Spending by Category:** Simplified data for pie charts and visualizations
+- **Budget Comparison:** Budget vs actual spending per category
+- **Month Comparison:** Side-by-side analysis of two months with trend indicators
+
+#### Upcoming Bills
+
+Track bills that need to be paid:
+```csharp
+GET /api/recurringbills/upcoming?days=30
+// Returns bills due in the next 30 days that haven't been paid yet
+```
+
 ### Testing
 
 All endpoints have been thoroughly tested using curl commands with JWT authentication. The API supports manual testing via tools like:
@@ -471,7 +544,10 @@ OurWealth.Api/
 │   ├── DebtPaymentsController.cs
 │   ├── SavingsGoalsController.cs
 │   ├── SavingsContributionsController.cs
-│   └── SettlementsController.cs
+│   ├── SettlementsController.cs
+│   ├── DashboardController.cs
+│   ├── ReportsController.cs
+│   └── UsersController.cs
 ├── Models/              # Entity models
 │   ├── User.cs
 │   ├── Household.cs

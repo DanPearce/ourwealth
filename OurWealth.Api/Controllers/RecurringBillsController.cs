@@ -60,6 +60,7 @@ public class RecurringBillsController : ControllerBase
 
         return Ok(bills);
     }
+    
     // GET: api/recurringbills/5
     [HttpGet("{id}")]
     public async Task<ActionResult<RecurringBill>> GetRecurringBill(int id)
@@ -129,6 +130,75 @@ public class RecurringBillsController : ControllerBase
         }
         
         return CreatedAtAction(nameof(GetRecurringBill), new { id = bill.Id }, bill);
+    }
+    
+    // GET: api/recurringbills/upcoming?days=7
+    [HttpGet("upcoming")]
+    public async Task<ActionResult<List<UpcomingBillResponse>>> GetUpcomingBills(
+        [FromQuery] int days = 30)
+    {
+        var userId = GetCurrentUserId();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        
+        if (user?.HouseholdId == null)
+        {
+            return BadRequest(new { message = "User must be part of a household" });
+        }
+        
+        var householdId = user.HouseholdId.Value;
+        var today = DateTime.UtcNow.Date;
+        var currentMonth = today.Month;
+        var currentYear = today.Year;
+        var currentDay = today.Day;
+        
+        var recurringBills = await _context.RecurringBills
+            .Where(rb => rb.HouseholdId == householdId && rb.IsActive)
+            .Include(rb => rb.Category)
+            .ToListAsync();
+        
+        var upcomingBills = new List<UpcomingBillResponse>();
+        
+        foreach (var bill in recurringBills)
+        {
+            if (!bill.DayOfMonth.HasValue || bill.DayOfMonth.Value < 1 || bill.DayOfMonth.Value > 31)
+            {
+                continue;
+            }
+
+            var dueDate = new DateTime(currentYear, currentMonth, bill.DayOfMonth.Value);           
+            
+            if (dueDate < today)
+            {
+                dueDate = dueDate.AddMonths(1);
+            }
+            
+            var daysUntilDue = (dueDate - today).Days;
+            
+            if (daysUntilDue <= days)
+            {
+                var isPaid = await _context.BillPayments
+                    .AnyAsync(bp => bp.RecurringBillId == bill.Id
+                                 && bp.Month == dueDate.Month
+                                 && bp.Year == dueDate.Year);
+                
+                if (!isPaid)
+                {
+                    upcomingBills.Add(new UpcomingBillResponse
+                    {
+                        BillId = bill.Id,
+                        Description = bill.Description,
+                        Amount = bill.Amount,
+                        IsVariableAmount = bill.IsVariableAmount,
+                        DueDate = dueDate,
+                        DaysUntilDue = daysUntilDue,
+                        IsOverdue = daysUntilDue < 0,
+                        CategoryName = bill.Category?.Name ?? "Uncategorized",
+                        CategoryColor = bill.Category?.Color ?? "#9CA3AF"
+                    });
+                }
+            }
+        }
+        return Ok(upcomingBills.OrderBy(b => b.DueDate).ToList());
     }
 
     // PUT: api/recurringbills/5
@@ -210,5 +280,18 @@ public class RecurringBillsController : ControllerBase
         public int ReminderDaysBefore { get; set; }
         public int? PaidByUserId { get; set; }
         public string? Notes { get; set; }
+    }
+    
+    public class UpcomingBillResponse
+    {
+        public int BillId { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal? Amount { get; set; }
+        public bool IsVariableAmount { get; set; }
+        public DateTime DueDate { get; set; }
+        public int DaysUntilDue { get; set; }
+        public bool IsOverdue { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public string CategoryColor { get; set; } = string.Empty;
     }
 }
